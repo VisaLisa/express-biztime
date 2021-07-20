@@ -2,7 +2,6 @@
 
 
 const express = require("express");
-
 const app = express();
 const ExpressError = require("./expressError")
 
@@ -18,7 +17,7 @@ app.use(function(req, res, next) {
 
 /** general error handler */
 
-app.use((err, req, res, next) => {
+app.use(function(err, req, res, next) => {
   res.status(err.status || 500);
 
   return res.json({
@@ -27,5 +26,8 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.listen(3000, function () {
+  console.log("Server started on 3000");
+});
 
 module.exports = app;
