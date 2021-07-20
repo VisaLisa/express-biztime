@@ -1,7 +1,8 @@
 const express = require("express");
-// const { route } = require("../../VideoCode/pg-intro/routes/users");
 const router = express.Router();
+const ExpressError = require('../expressError');
 const db = require("../db");
+
 
 router.get('/', async (req, res, next) => {
     try {
