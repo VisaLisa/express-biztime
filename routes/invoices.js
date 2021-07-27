@@ -76,7 +76,7 @@ router.put("/:id", async (req, res, next) => {
     const { id } = req.params;
     const { amt, paid } = req.body;
     if (!amt) {
-      throw new ExpressError("Missing required data", 400);
+      throw new ExpressError("Missing required data", 404);
     }
     const currResults = await db.query(
       `SELECT paid FROM invoices WHERE id = $1`,
