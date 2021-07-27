@@ -15,21 +15,25 @@ router.get("/", async (req, res, next) => {
 });
 
 // Get Route id
-router.get("/:code", async function (req, res, next) {
+router.get("/:code", async (req, res, next) => {
   try {
     const { code } = req.params;
-    const companyQuery = await db.query(
-      `SELECT code, name, description FROM companies WHERE code = $1`,
+    const results = await db.query(
+      "SELECT code, name, description FROM companies WHERE code=$1",
       [code]
     );
-    if (companyQuery.rows.length === 0) {
-      let notFoundError = new Error(
-        `There is no company with code '${req.params.code}`
-      );
-      notFoundError.status = 404;
-      throw notFoundError;
+    const inv_Results = await db.query(
+      "SELECT * FROM invoices WHERE comp_code=$1",
+      [code]
+    );
+    if (results.rows.length === 0) {
+      throw new ExpressError(`Can't find company with code of ${code}`, 404);
     }
-    return res.json({ company: companyQuery.rows[0] });
+    const company = results.rows[0];
+
+    company.invoices = inv_Results.rows;
+
+    return res.json({ company: company });
   } catch (e) {
     return next(e);
   }

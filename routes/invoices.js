@@ -53,8 +53,76 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //post router
+router.post("/", async (req, res, next) => {
+  try {
+    const { comp_code, amt } = req.body;
+    if (!comp_code || !amt) {
+      throw new ExpressError("Missing required data", 400);
+    }
+    const results = await db.query(
+      `INSERT INTO invoices (comp_code, amt) 
+      VALUES ($1, $2) 
+        RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+      [comp_code, amt]
+    );
+    return res.status(201).json({ invoice: results.rows[0] });
+  } catch (e) {
+    return next(e);
+  }
+});
 //put router
+router.put("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { amt, paid } = req.body;
+    if (!amt) {
+      throw new ExpressError("Missing required data", 400);
+    }
+    const currResults = await db.query(
+      `SELECT paid FROM invoices WHERE id = $1`,
+      [id]
+    );
+    if (currResults.rows.length === 0) {
+      throw new ExpressError(`Invoice ID ${id} not found`, 404);
+    }
+    const currPaidDate = currResults.rows[0].paid_date;
+
+    if (!currPaidDate && paid) {
+      paidDate = new Date();
+    } else if (!paid) {
+      paidDate = null;
+    } else {
+      paidDate = currPaidDate;
+    }
+
+    const results = await db.query(
+      `UPDATE invoices
+           SET amt=$1, paid=$2, paid_date=$3
+           WHERE id=$4
+           RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+      [amt, paid, paidDate, id]
+    );
+    return res.send({ invoice: results.rows[0] });
+  } catch (e) {
+    return next(e);
+  }
+});
 //delete router
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const results = await db.query(
+      `DELETE FROM invoices WHERE id=$1 RETURNING id`,
+      [id]
+    );
+    if (results.rowCount === 0) {
+      throw new ExpressError(`Invoice ID: ${id} not found`, 404);
+    }
+    return res.send({ msg: `Deleted Invoice: ${id}` });
+  } catch (e) {
+    return next(e);
+  }
+});
 
 module.exports = router;
 
