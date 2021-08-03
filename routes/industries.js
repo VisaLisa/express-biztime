@@ -50,25 +50,10 @@ router.post("/:company", async (req, res, next) => {
   }
 });
 
-//put route industries
-router.put("/:code", async (req, res, next) => {
-  try {
-    const { code, industry } = req.body;
-    const result = await db.query(
-      `INSERT INTO industries (code, industry)
-      VALUES ($1, $2)
-      RETURNING code, industry`,
-      [code, industry]
-    );
-  } catch (e) {
-    return next(e);
-  }
-});
-
 //delete reoute delete industry
 router.delete("/:code", async (req, res, next) => {
   try {
-    const {} = req.params;
+    const { code } = req.params;
     const result = await db.query(
       `DELETE FROM industries
       WHERE code = $1
