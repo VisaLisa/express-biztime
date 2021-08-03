@@ -23,8 +23,8 @@ CREATE TABLE invoices (
 );
 
 CREATE TABLE industries (
-    code text PRIMARY KEY,
-    title text NOT NULL UNIQUE
+    icode text PRIMARY KEY,
+    industry text NOT NULL UNIQUE
 );
 
 CREATE TABLE companies_industries (
@@ -46,8 +46,8 @@ INSERT INTO invoices (comp_Code, amt, paid, paid_date)
 INSERT INTO industries
   VALUES ('tech', 'Technology'),
          ('soft', 'Software'),
-         ('hard', 'Hardware')
+         ('hard', 'Hardware');
 
 INSERT INTO companies_industries
   VALUES ('apple', 'hard'),
-         ('ibm', 'hard')
+         ('ibm', 'hard');

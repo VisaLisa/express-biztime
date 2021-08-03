@@ -43,7 +43,7 @@ router.post("/", async (req, res, next) => {
   try {
     const { name, description } = req.body;
     //slugify to standardize name into lowercase & hypen code
-    const code = slugify(name, { lower: true });
+    const code = slugify(name, { lower: true, replacement: "_" });
 
     //throw error if not complete field
     if (!code || !name || !description) {
