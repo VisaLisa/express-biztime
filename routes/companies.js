@@ -18,24 +18,32 @@ router.get("/", async (req, res, next) => {
 router.get("/:code", async (req, res, next) => {
   try {
     const { code } = req.params;
-    const results = await db.query(
-      "SELECT code, name, description FROM companies WHERE code=$1",
+    const results = await db.query(`SELECT * FROM companies WHERE code = $1`, [
+      code,
+    ]);
+    const id_results = await db.query(
+      `SELECT * FROM invoices WHERE comp_code = $1`,
       [code]
     );
-    const inv_Results = await db.query(
-      "SELECT * FROM invoices WHERE comp_code=$1",
+    const test = await db.query(
+      `SELECT name, description, industry_code 
+       FROM companies RIGHT 
+       JOIN company_industry 
+       ON companies.code = company_industry.company 
+       WHERE companies.code = $1`,
       [code]
     );
+    const industry = test.rows.map((cd) => cd.industry_code);
     if (results.rows.length === 0) {
-      throw new ExpressError(`Can't find company with code of ${code}`, 404);
+      new ExpressError(`Cant Find Company with code of ${code}`, 404);
     }
-    const company = results.rows[0];
-
-    company.invoices = inv_Results.rows;
-
-    return res.json({ company: company });
+    return res.json({
+      company: results.rows[0],
+      invoices: id_results.rows,
+      industries: industry,
+    });
   } catch (e) {
-    return next(e);
+    next(e);
   }
 });
 // POST Route
@@ -43,7 +51,7 @@ router.post("/", async (req, res, next) => {
   try {
     const { name, description } = req.body;
     //slugify to standardize name into lowercase & hypen code
-    const code = slugify(name, { lower: true, replacement: "_" });
+    const code = slugify(name, { lower: true });
 
     //throw error if not complete field
     if (!code || !name || !description) {
